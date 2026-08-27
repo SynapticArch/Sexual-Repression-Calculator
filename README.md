@@ -25,7 +25,7 @@
 
 ### 安装和运行
 
-```bash
+```
 # 克隆项目
 git clone [project-url]
 cd Sexual-Repression-Calculator
@@ -43,10 +43,61 @@ npm run build
 npm start
 ```
 
+### 使用 Docker 运行
+
+```bash
+docker run -p 8000:8000 appe233/sexual-repression-calculator
+```
+
 ### 访问应用
 
 - 开发环境: http://localhost:3000
 - 生产环境: 根据部署配置
+
+## ☁️ Cloudflare Pages 部署
+
+该项目已针对 Cloudflare Pages 进行优化，可以轻松部署。
+
+### 部署配置
+
+- **构建命令**: `npm run cf:deploy`
+- **输出目录**: `dist`
+
+### 部署步骤
+
+1. 将代码推送到 GitHub 仓库
+2. 在 Cloudflare Dashboard 中创建 Pages 应用
+3. 连接 GitHub 仓库
+4. 配置构建设置：
+   - 构建命令: `npm run cf:deploy`
+   - 输出目录: `dist`
+5. 点击部署
+
+### 防滥用功能
+
+为了防止项目被恶意倒卖，本项目提供了两种防滥用机制：
+
+1. **跳转页面机制**（推荐用于完全阻止访问）：
+   - 在 Cloudflare Pages 项目设置中添加环境变量：
+     - `ABUSE_REDIRECT_ENABLED` = `true`
+   - 当该环境变量设置为 `true` 时，所有访问都会跳转到防滥用说明页面
+   - 该页面会倒计时5秒后自动跳转到 GitHub 原始项目地址
+   - 用户也可以手动点击按钮立即跳转
+
+2. **弹窗提醒机制**（用于提醒用户）：
+   - 在 Cloudflare Pages 项目设置中添加环境变量：
+     - `SHOW_ABUSE_POPUP` = `true`
+   - 当该环境变量设置为 `true` 时，用户访问网站时会看到防滥用提醒弹窗
+   - 用户关闭弹窗后可以正常使用网站
+
+你可以根据需要选择其中一种或两种机制同时使用。
+
+### 注意事项
+
+- 此应用是纯静态的 React 应用，所有数据处理都在客户端进行
+- 不需要服务器端 API，所有功能都可以在浏览器中完成
+- 应用使用 localStorage 存储用户数据，数据不会上传到服务器
+- 使用 `--legacy-peer-deps` 参数解决依赖冲突问题
 
 ## 📋 功能说明
 
@@ -176,7 +227,7 @@ src/
 
 ### 测试
 
-```bash
+```
 # 类型检查
 npm run type-check
 

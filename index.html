@@ -23,8 +23,117 @@
     </script>
   </head>
 
-  <!-- IMPORTANT: do not modify the code in the <body/> tag. -->
   <body>
     <div id="root"></div>
+    
+    <!-- 防滥用弹窗 -->
+    <script>
+    (async () => {
+      try {
+        console.log("开始检查防滥用弹窗条件");
+        
+        // 检查是否设置了"不再显示"的cookie
+        const hidePopup = document.cookie.split(';').find(cookie => cookie.trim().startsWith('hideAbusePopup=true'));
+        console.log("检查是否设置'不再显示'cookie:", hidePopup);
+        
+        if (hidePopup) {
+          console.log("用户已选择不再显示弹窗，跳过显示");
+          return; // 如果设置了cookie，则不显示弹窗
+        }
+
+        // 调用 Cloudflare Functions 提供的接口来获取环境变量
+        console.log("正在获取环境变量...");
+        const res = await fetch("/api/env");
+        const envData = await res.json();
+        console.log("获取到的环境变量:", envData);
+        
+        const { showAbusePopup } = envData;
+
+        if (showAbusePopup === "true") {
+          console.log("显示防滥用弹窗");
+          const popup = document.createElement("div");
+          popup.innerHTML = `
+            <div id="abuse-popup"
+              style="
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.5);
+                display: flex; justify-content: center; align-items: center;
+                z-index: 9999;
+              ">
+              <div style="
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                max-width: 400px;
+                text-align: center;
+                box-shadow: 0 0 15px rgba(0,0,0,0.2);
+              ">
+                <h2>📢 项目声明</h2>
+                <p>本项目为 <b>免费开源项目</b>，请勿付费购买！</p>
+                <p>原项目地址：</p>
+                <p>
+                  <a href="https://github.com/banlanzs/Sexual-Repression-Calculator" target="_blank" 
+                     style="display: inline-flex; align-items: center; gap: 0.5rem; 
+                            padding: 0.5rem 1rem; background: #333; color: white; 
+                            border-radius: 4px; text-decoration: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/>
+                      <path d="M9 18c-4.51 2-5-2-7-2"/>
+                    </svg>
+                    点击这里
+                  </a>
+                </p>
+                <p>如果你是花钱买到的链接，请及时退款/举报⚠️</p>
+                <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center;">
+                  <button id="close-abuse-popup" style="
+                    padding: 0.75rem 1.5rem; 
+                    background: #007bff; 
+                    color: white; 
+                    border: none; 
+                    border-radius: 4px; 
+                    cursor: pointer;
+                    font-weight: 500;
+                    transition: background 0.2s;
+                  ">我已知晓</button>
+                  <button id="hide-abuse-popup" style="
+                    padding: 0.75rem 1.5rem; 
+                    background: #6c757d; 
+                    color: white; 
+                    border: none; 
+                    border-radius: 4px; 
+                    cursor: pointer;
+                    font-weight: 500;
+                    transition: background 0.2s;
+                  ">不再显示</button>
+                </div>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(popup);
+
+          // 处理"我已知晓"按钮点击事件
+          document.getElementById("close-abuse-popup").addEventListener("click", () => {
+            console.log("用户点击'我已知晓'按钮");
+            document.getElementById("abuse-popup").remove();
+          });
+
+          // 处理"不再显示"按钮点击事件
+          document.getElementById("hide-abuse-popup").addEventListener("click", () => {
+            console.log("用户点击'不再显示'按钮");
+            // 设置cookie，有效期为30天
+            const expiryDate = new Date();
+            expiryDate.setTime(expiryDate.getTime() + (30 * 24 * 60 * 60 * 1000));
+            document.cookie = "hideAbusePopup=true; expires=" + expiryDate.toUTCString() + "; path=/";
+            document.getElementById("abuse-popup").remove();
+          });
+        } else {
+          console.log("防滥用弹窗未启用，showAbusePopup值:", showAbusePopup);
+        }
+      } catch (err) {
+        console.error("弹窗加载失败", err);
+      }
+    })();
+    </script>
   </body>
 </html>
